@@ -1,0 +1,4 @@
+assets/uploads/*
+!assets/uploads/.gitkeep
+.vscode/
+*.log
