@@ -13,6 +13,7 @@ USE jobio;
 CREATE TABLE IF NOT EXISTS NguoiDung (
     ID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     HoTen VARCHAR(100) NOT NULL,
+    TenCongTy VARCHAR(150) NULL,
     Email VARCHAR(191) NOT NULL,
     MatKhau VARCHAR(255) NOT NULL,
     VaiTro ENUM('ung_vien', 'nha_tuyen_dung') NOT NULL,
