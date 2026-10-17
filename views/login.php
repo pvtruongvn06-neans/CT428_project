@@ -14,19 +14,27 @@ $redirect = $_GET['redirect'] ?? 'index.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Nhập – Jobio</title>
     <link rel="icon" type="image/png" href="../assets/images/icon.png?v=2">
-    
+
     <!-- Bootstrap 5 & Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/style.css">
 
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         .auth-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
@@ -34,19 +42,30 @@ $redirect = $_GET['redirect'] ?? 'index.php';
             box-shadow: 0 10px 30px rgba(13, 59, 102, 0.08);
             overflow: hidden;
         }
+
         .auth-header {
             background: linear-gradient(135deg, #0a2540 0%, #12518e 100%);
             color: white;
             padding: 30px;
             text-align: center;
         }
-        .btn-orange { background-color: #f39c12; color: #fff; font-weight: 600; }
-        .btn-orange:hover { background-color: #e08e0b; color: #fff; }
+
+        .btn-orange {
+            background-color: #f39c12;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .btn-orange:hover {
+            background-color: #e08e0b;
+            color: #fff;
+        }
     </style>
 </head>
+
 <body>
 
-    <!-- NAVBAR NGÀN GỌN -->
+    <!-- NAVBAR NGẮN GỌN -->
     <nav class="navbar navbar-light bg-white border-bottom py-2">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="index.php">
@@ -72,7 +91,7 @@ $redirect = $_GET['redirect'] ?? 'index.php';
                         <h4 class="fw-bold m-0">ĐĂNG NHẬP</h4>
                         <small class="text-white-50">Chào mừng bạn quay lại với Jobio</small>
                     </div>
-                    
+
                     <div class="p-4">
                         <!-- Thông báo lỗi/thành công từ JS -->
                         <div id="auth-alert" class="d-none alert py-2 fs-7 mb-3"></div>
@@ -131,4 +150,5 @@ $redirect = $_GET['redirect'] ?? 'index.php';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/auth.js"></script>
 </body>
+
 </html>

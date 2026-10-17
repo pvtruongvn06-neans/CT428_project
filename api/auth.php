@@ -169,9 +169,10 @@ try {
                 $user &&
                 password_verify($mat_khau, $user['MatKhau'])
             ) {
-                // Tao Session ID moi sau khi dang nhap
+                // Tao Session ID moi sau khi dang nhap (chong tan cong fixation)
                 session_regenerate_id(true);
 
+                // Luu thong tin nguoi dung vao session
                 $_SESSION['user_id'] = $user['ID'];
                 $_SESSION['ho_ten'] = $user['HoTen'];
                 $_SESSION['vai_tro'] = $user['VaiTro'];
@@ -185,12 +186,15 @@ try {
                         'vai_tro' => $user['VaiTro']
                     ]
                 ]);
+            } else {
+                // FIX: Dua vao khoi else de dam bao chi chay khi dang nhap that bai
+                // Truoc day code nay nam ngoai if, du khong loi (vi jsonResponse goi exit)
+                // nhung viet else giup logic ro rang va an toan hon
+                jsonResponse([
+                    'status' => 'error',
+                    'message' => 'Email hoac mat khau khong chinh xac.'
+                ], 401);
             }
-
-            jsonResponse([
-                'status' => 'error',
-                'message' => 'Email hoac mat khau khong chinh xac.'
-            ], 401);
 
             break;
 
@@ -207,6 +211,7 @@ try {
                     $_SESSION['vai_tro']
                 )
             ) {
+                // Nguoi dung da dang nhap, tra ve thong tin session
                 jsonResponse([
                     'status' => 'success',
                     'user' => [
@@ -215,11 +220,13 @@ try {
                         'vai_tro' => $_SESSION['vai_tro']
                     ]
                 ]);
+            } else {
+                // FIX: Boc trong else de logic ro rang hon
+                // Chua dang nhap hoac session het han
+                jsonResponse([
+                    'status' => 'unauthenticated'
+                ], 401);
             }
-
-            jsonResponse([
-                'status' => 'unauthenticated'
-            ], 401);
 
             break;
 
