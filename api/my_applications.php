@@ -26,8 +26,8 @@ try {
         ], 401);
     }
 
-    // 2. Kiểm tra quyền: Chỉ tài khoản Ứng viên mới được xem
-    if ($_SESSION['vai_tro'] !== 'ung_vien') {
+    // 2. Kiểm tra quyền: Sửa dòng này để hỗ trợ cả 'candidate' và 'ung_vien'
+    if (!in_array($_SESSION['vai_tro'], ['candidate', 'ung_vien'], true)) {
         jsonResponse([
             'status' => 'error',
             'message' => 'Bạn không có quyền truy cập lịch sử ứng tuyển.'

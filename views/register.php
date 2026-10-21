@@ -89,7 +89,7 @@ if (!in_array($role, ['candidate', 'employer'])) {
     <nav class="navbar navbar-light bg-white border-bottom py-2">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="index.php">
-                <img src="../assets/images/icon.png?v=2" alt="Logo Jobio" width="40" height="40" class="me-2">
+                <!-- <img src="../assets/images/icon.png?v=2" alt="Logo Jobio" width="40" height="40" class="me-2"> -->
                 <div>
                     <span class="lh-1 fw-bold text-dark" style="color: #0d3b66 !important;">JOBIO</span>
                     <span class="small text-muted d-block" style="font-size: 11px;">Input Talent, Output Success</span>

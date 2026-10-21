@@ -87,7 +87,7 @@ $redirect = $_GET['redirect'] ?? 'index.php';
             <div class="col-md-5 col-lg-4">
                 <div class="auth-card">
                     <div class="auth-header">
-                        <img src="../assets/images/icon.png?v=2" alt="Logo Jobio" width="55" height="55" class="mb-2">
+                        <!-- <img src="../assets/images/icon.png?v=2" alt="Logo Jobio" width="55" height="55" class="mb-2"> -->
                         <h4 class="fw-bold m-0">ĐĂNG NHẬP</h4>
                         <small class="text-white-50">Chào mừng bạn quay lại với Jobio</small>
                     </div>
@@ -114,16 +114,16 @@ $redirect = $_GET['redirect'] ?? 'index.php';
                                 </div>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
-                                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                                    <input type="password" name="mat_khau" class="form-control" placeholder="••••••••" required>
                                 </div>
                             </div>
 
-                            <div class="form-check mb-4">
+                            <!-- <div class="form-check mb-4">
                                 <input class="form-check-input" type="checkbox" id="remember" name="remember">
                                 <label class="form-check-input-label small text-muted" for="remember">
                                     Ghi nhớ đăng nhập
                                 </label>
-                            </div>
+                            </div> -->
 
                             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-3 shadow-sm mb-3" style="background-color: #0d3b66; border: none;">
                                 <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
@@ -149,6 +149,49 @@ $redirect = $_GET['redirect'] ?? 'index.php';
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/auth.js"></script>
+    <!-- Đặt ở cuối file views/login.php -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const loginForm = document.getElementById('login-form');
+        const alertBox = document.getElementById('auth-alert');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(loginForm);
+
+                fetch('../api/auth.php?action=login', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        if (alertBox) {
+                            alertBox.className = 'alert alert-success py-2 fs-7 mb-3';
+                            alertBox.textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
+                        }
+                        // TỰ ĐỘNG CHUYỂN HƯỚNG TỚI TRẠNG QUẢN LÝ (employer_dashboard.php) NẾU LÀ NTD
+                        setTimeout(() => {
+                            window.location.href = data.redirect || 'index.php';
+                        }, 500);
+                    } else {
+                        if (alertBox) {
+                            alertBox.className = 'alert alert-danger py-2 fs-7 mb-3';
+                            alertBox.textContent = data.message || 'Đăng nhập thất bại!';
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Có lỗi xảy ra, vui lòng thử lại!');
+                });
+            });
+        }
+    });
+    </script>
+
 </body>
 
 </html>
