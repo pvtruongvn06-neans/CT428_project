@@ -1,4 +1,3 @@
-
 <?php
 
 session_start();
@@ -50,8 +49,13 @@ try {
             $ho_ten = trim($input['ho_ten'] ?? '');
             $email = trim($input['email'] ?? '');
             $mat_khau = $input['mat_khau'] ?? '';
-            $vai_tro = $input['vai_tro'] ?? '';
+            $vai_tro_raw = $input['vai_tro'] ?? '';
             $ten_cong_ty = trim($input['company_name'] ?? '');
+
+            // Chuan hoa vai tro tieng Anh sang tieng Viet de dong bo CSDL
+            $vai_tro = $vai_tro_raw;
+            if ($vai_tro_raw === 'employer') $vai_tro = 'nha_tuyen_dung';
+            if ($vai_tro_raw === 'candidate') $vai_tro = 'ung_vien';
 
             // 2. Kiem tra du lieu
             if (
@@ -78,9 +82,9 @@ try {
             // 3. Kiem tra email da ton tai chua
             $stmt = $pdo->prepare(
                 'SELECT ID
-         FROM NguoiDung
-         WHERE Email = :email
-         LIMIT 1'
+           FROM NguoiDung
+           WHERE Email = :email
+           LIMIT 1'
             );
 
             $stmt->execute([
@@ -177,19 +181,20 @@ try {
                 $_SESSION['ho_ten'] = $user['HoTen'];
                 $_SESSION['vai_tro'] = $user['VaiTro'];
 
+                $redirectUrl = 'index.php';
+
                 jsonResponse([
                     'status' => 'success',
                     'message' => 'Dang nhap thanh cong.',
+                    'redirect' => $redirectUrl,
                     'data' => [
                         'id' => $user['ID'],
                         'ho_ten' => $user['HoTen'],
-                        'vai_tro' => $user['VaiTro']
+                        'vai_tro' => $user['VaiTro'],
+                        'redirect' => $redirectUrl
                     ]
                 ]);
             } else {
-                // FIX: Dua vao khoi else de dam bao chi chay khi dang nhap that bai
-                // Truoc day code nay nam ngoai if, du khong loi (vi jsonResponse goi exit)
-                // nhung viet else giup logic ro rang va an toan hon
                 jsonResponse([
                     'status' => 'error',
                     'message' => 'Email hoac mat khau khong chinh xac.'
@@ -211,17 +216,19 @@ try {
                     $_SESSION['vai_tro']
                 )
             ) {
+                $isEmployer = in_array($_SESSION['vai_tro'], ['employer', 'nha_tuyen_dung'], true);
+
                 // Nguoi dung da dang nhap, tra ve thong tin session
                 jsonResponse([
                     'status' => 'success',
                     'user' => [
                         'id' => $_SESSION['user_id'],
                         'ho_ten' => $_SESSION['ho_ten'],
-                        'vai_tro' => $_SESSION['vai_tro']
+                        'vai_tro' => $_SESSION['vai_tro'],
+                        'is_employer' => $isEmployer
                     ]
                 ]);
             } else {
-                // FIX: Boc trong else de logic ro rang hon
                 // Chua dang nhap hoac session het han
                 jsonResponse([
                     'status' => 'unauthenticated'
