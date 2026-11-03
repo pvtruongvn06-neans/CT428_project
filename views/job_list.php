@@ -273,93 +273,6 @@ $location = $_GET['location'] ?? '';
 
             <!-- Khối chứa danh sách việc làm (Có sẵn dữ liệu mẫu khi chưa gọi API) -->
             <div id="job-list" class="row g-3">
-                
-                <!-- Card 1 -->
-                <div class="col-md-6">
-                    <div class="job-featured-card">
-                        <div class="job-logo-box"><i class="bi bi-laptop"></i></div>
-                        <div class="flex-grow-1 pe-4">
-                            <a href="job_detail.php?id=1" class="job-title">Lập Trình Viên PHP / MySQL</a>
-                            <div class="job-company">Công Ty TNHH Công Nghệ Jobio</div>
-                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>10 - 15 triệu</div>
-                            <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>Ninh Kiều, Cần Thơ</div>
-                        </div>
-                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
-                    </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="col-md-6">
-                    <div class="job-featured-card">
-                        <div class="job-logo-box"><i class="bi bi-graph-up-arrow"></i></div>
-                        <div class="flex-grow-1 pe-4">
-                            <a href="job_detail.php?id=2" class="job-title">Chuyên Viên Marketing Online</a>
-                            <div class="job-company">Tập Đoàn Truyền Thông ĐBSCL</div>
-                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>8 - 12 triệu</div>
-                            <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>Cái Răng, Cần Thơ</div>
-                        </div>
-                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="col-md-6">
-                    <div class="job-featured-card">
-                        <div class="job-logo-box"><i class="bi bi-calculator"></i></div>
-                        <div class="flex-grow-1 pe-4">
-                            <a href="job_detail.php?id=3" class="job-title">Kế Toán Tổng Hợp</a>
-                            <div class="job-company">Ngân Hàng Thương Mại Cần Thơ</div>
-                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>9 - 11 triệu</div>
-                            <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>Bình Thủy, Cần Thơ</div>
-                        </div>
-                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
-                    </div>
-                </div>
-
-                <!-- Card 4 -->
-                <div class="col-md-6">
-                    <div class="job-featured-card">
-                        <div class="job-logo-box"><i class="bi bi-headset"></i></div>
-                        <div class="flex-grow-1 pe-4">
-                            <a href="job_detail.php?id=4" class="job-title">Nhân Viên Chăm Sóc Khách Hàng</a>
-                            <div class="job-company">Trung Tâm Dịch Vụ Khách Hàng Jobio</div>
-                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>7 - 9 triệu</div>
-                            <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>Ninh Kiều, Cần Thơ</div>
-                        </div>
-                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
-                    </div>
-                </div>
-
-                <!-- Card 5 -->
-                <div class="col-md-6">
-                    <div class="job-featured-card">
-                        <div class="job-logo-box"><i class="bi bi-code-slash"></i></div>
-                        <div class="flex-grow-1 pe-4">
-                            <a href="job_detail.php?id=5" class="job-title">Lập Trình Viên Frontend (ReactJS / VueJS)</a>
-                            <div class="job-company">Công Ty Giải Pháp Phần Mềm Mekong</div>
-                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>12 - 18 triệu</div>
-                            <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>Ninh Kiều, Cần Thơ</div>
-                        </div>
-                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
-                    </div>
-                </div>
-
-                <!-- Card 6 -->
-                <div class="col-md-6">
-                    <div class="job-featured-card">
-                        <div class="job-logo-box"><i class="bi bi-person-gear"></i></div>
-                        <div class="flex-grow-1 pe-4">
-                            <a href="job_detail.php?id=6" class="job-title">Chuyên Viên Hành Chính Nhân Sự</a>
-                            <div class="job-company">Tập Đoàn Nông Nghiệp Xanh</div>
-                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>8 - 10 triệu</div>
-                            <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>Ô Môn, Cần Thơ</div>
-                        </div>
-                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
-                    </div>
-                </div>
-
-            </div>
-
             <!-- Nút kêu gọi Đăng ký dành cho người dùng chưa đăng nhập -->
             <?php if (!$isLoggedIn): ?>
             <div class="mt-5 p-4 bg-white border rounded-3 text-center shadow-sm">
@@ -407,5 +320,60 @@ $location = $_GET['location'] ?? '';
                 });
         }
     </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const keyword = urlParams.get('keyword') || '';
+    const location = urlParams.get('location') || '';
+
+    const jobListContainer = document.getElementById('job-list');
+    if (!jobListContainer) return;
+
+    // Hiển thị trạng thái đang tải
+    jobListContainer.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>';
+
+    // Gọi API lấy danh sách việc làm đã lọc
+    fetch(`../api/jobs_public.php?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`)
+        .then(res => res.json())
+        .then(res => {
+            jobListContainer.innerHTML = '';
+
+            if (res.status === 'success' && res.data && res.data.length > 0) {
+                res.data.forEach(job => {
+                    jobListContainer.innerHTML += `
+                        <div class="col-md-6">
+                            <div class="job-featured-card" onclick="window.location.href='job_detail.php?id=${job.ID}';" style="cursor: pointer;">
+                                <div class="job-logo-box"><i class="bi bi-briefcase"></i></div>
+                                <div class="flex-grow-1 pe-4">
+                                    <a href="job_detail.php?id=${job.ID}" class="job-title" onclick="event.stopPropagation();">${escapeHtml(job.TieuDe)}</a>
+                                    <div class="job-company">${escapeHtml(job.TenNhaTuyenDung || 'Doanh nghiệp')}</div>
+                                    <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>${escapeHtml(job.Luong || 'Thỏa thuận')}</div>
+                                    <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>${escapeHtml(job.DiaDiem)}</div>
+                                </div>
+                                <i class="bi bi-heart job-heart-btn" title="Lưu việc làm" onclick="event.stopPropagation();"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                jobListContainer.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-search fs-1 text-muted d-block mb-2"></i>
+                        <h5 class="text-secondary">Không tìm thấy việc làm nào phù hợp${keyword ? ' với từ khóa "' + escapeHtml(keyword) + '"' : ''}.</h5>
+                    </div>
+                `;
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi tải dữ liệu:', err);
+            jobListContainer.innerHTML = '<div class="col-12 text-center text-danger py-4">Có lỗi xảy ra khi tải danh sách việc làm.</div>';
+        });
+
+    function escapeHtml(str) {
+        return str ? String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+    }
+});
+</script>
+
 </body>
 </html>

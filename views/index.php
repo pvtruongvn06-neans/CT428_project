@@ -129,20 +129,28 @@ $userName = $_SESSION['ho_ten'] ?? $_SESSION['user_name'] ?? 'Tài khoản';
                 <div class="col-lg-9">
                     <form action="job_list.php" method="GET">
                         <div class="search-container d-flex align-items-center">
-                            <i class="bi bi-search text-muted fs-5 ms-2 me-2"></i>
-                            <input type="text" name="keyword" id="keyword" class="form-control search-input" placeholder="Tên công việc, vị trí, kỹ năng tuyển dụng...">
+                        <i class="bi bi-search text-muted fs-5 ms-2 me-2"></i>
+    
+                        <!-- KHUNG CHỨA INPUT VÀ POPUP GỢI Ý -->
+                        <div class="position-relative flex-grow-1">
+                        <input type="text" name="keyword" id="keyword" class="form-control search-input" placeholder="Tên công việc, vị trí, kỹ năng tuyển dụng..." autocomplete="off">
+        
+                       <!-- Khung hiển thị gợi ý xổ xuống -->
+                    <div id="search-suggestions" class="list-group position-absolute w-100 shadow-lg d-none" style="z-index: 10000; top: 110%; left: 0; text-align: left; max-height: 320px; overflow-y: auto;"></div></div>
 
-                            <div class="d-none d-md-block flex-shrink-0 me-2" style="width: 190px;">
-                                <select class="form-select search-select" name="location" id="location">
-                                    <option value="">📍 Tất cả địa điểm</option>
-                                    <option value="Cần Thơ">Cần Thơ</option>
-                                    <option value="TP.HCM">TP. Hồ Chí Minh</option>
-                                    <option value="Hà Nội">Hà Nội</option>
-                                </select>
-                            </div>
+                    <div class="d-none d-md-block flex-shrink-0 me-2" style="width: 190px;">
+                    <select class="form-select search-select" name="location" id="location">
+                    <option value="">📍 Tất cả địa điểm</option>
+                    <option value="Cần Thơ">Cần Thơ</option>
+                    <option value="TP.HCM">TP. Hồ Chí Minh</option>
+                    <option value="Hà Nội">Hà Nội</option>
+    </select>
+    </div>
 
-                            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold flex-shrink-0">
-                                <i class="bi bi-search me-1"></i> Tìm kiếm
+    <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold flex-shrink-0">
+        <i class="bi bi-search me-1"></i> Tìm kiếm
+    </button>
+</div>
                             </button>
                         </div>
                     </form>
@@ -465,6 +473,71 @@ $userName = $_SESSION['ho_ten'] ?? $_SESSION['user_name'] ?? 'Tài khoản';
                 });
         }
     </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const keywordInput = document.getElementById('keyword');
+        const suggestionsBox = document.getElementById('search-suggestions');
+        let timeout = null;
+
+        if (!keywordInput || !suggestionsBox) return;
+
+        keywordInput.addEventListener('input', function () {
+            clearTimeout(timeout);
+            const kw = this.value.trim();
+
+            // Nếu người dùng nhập dưới 2 ký tự thì ẩn bảng gợi ý
+            if (kw.length < 2) {
+                suggestionsBox.innerHTML = '';
+                suggestionsBox.classList.add('d-none');
+                return;
+            }
+
+            // Chờ 300ms sau khi ngừng gõ để gọi API jobs_public.php
+            timeout = setTimeout(() => {
+                fetch(`../api/jobs_public.php?keyword=${encodeURIComponent(kw)}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        suggestionsBox.innerHTML = '';
+
+                        if (res.status === 'success' && res.data && res.data.length > 0) {
+                            res.data.slice(0, 6).forEach(job => {
+                                const item = document.createElement('a');
+                                item.href = `job_detail.php?id=${job.ID}`;
+                                item.className = 'list-group-item list-group-item-action py-2.5 px-3 border-bottom';
+                                item.innerHTML = `
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-primary mb-1">${escapeHtml(job.TieuDe)}</div>
+                                            <small class="text-muted"><i class="bi bi-building me-1"></i>${escapeHtml(job.TenNhaTuyenDung)}</small>
+                                        </div>
+                                        <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>${escapeHtml(job.DiaDiem)}</small>
+                                    </div>
+                                `;
+                                suggestionsBox.appendChild(item);
+                            });
+                            suggestionsBox.classList.remove('d-none');
+                        } else {
+                            suggestionsBox.innerHTML = '<div class="list-group-item text-muted text-center py-2.5">Không tìm thấy việc làm phù hợp</div>';
+                            suggestionsBox.classList.remove('d-none');
+                        }
+                    })
+                    .catch(err => console.error('Lỗi gợi ý:', err));
+            }, 300);
+        });
+
+        // Click ra ngoài thì ẩn popup gợi ý
+        document.addEventListener('click', function (e) {
+            if (!keywordInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.classList.add('d-none');
+            }
+        });
+
+        function escapeHtml(str) {
+            return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+        }
+    });
+    </script>
+
 </body>
 
 </html>

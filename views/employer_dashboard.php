@@ -26,9 +26,7 @@ $employerId = $_SESSION['user_id'];
 $userName   = $_SESSION['ho_ten'] ?? $_SESSION['user_name'] ?? 'Nhà tuyển dụng';
 
 // 3. TRUY VẤN DỮ LIỆU BÀI ĐĂNG VÀ HỒ SƠ CV
-$jobs              = [];
-$totalJobs         = 0;
-$totalApplications = 0;
+$jobs = [];
 
 if (isset($pdo) && $pdo instanceof PDO) {
     try {
@@ -43,18 +41,6 @@ if (isset($pdo) && $pdo instanceof PDO) {
         ");
         $stmtJobs->execute([':emp_id' => $employerId]);
         $jobs = $stmtJobs->fetchAll(PDO::FETCH_ASSOC);
-
-        $totalJobs = count($jobs);
-
-        // Đếm tổng số CV đã nộp vào tất cả bài đăng
-        $stmtTotalCv = $pdo->prepare("
-            SELECT COUNT(h.ID) 
-            FROM HoSoUngTuyen h
-            JOIN TinTuyenDung t ON (h.ID_TinTuyenDung = t.ID OR h.id_tin_tuyen_dung = t.id)
-            WHERE t.ID_NguoiDung = :emp_id OR t.id_nguoi_dung = :emp_id
-        ");
-        $stmtTotalCv->execute([':emp_id' => $employerId]);
-        $totalApplications = (int) $stmtTotalCv->fetchColumn();
 
     } catch (PDOException $e) {
         error_log("Lỗi Dashboard: " . $e->getMessage());
@@ -86,33 +72,11 @@ if (isset($pdo) && $pdo instanceof PDO) {
             flex-direction: column;
         }
         .main-content { flex: 1; }
-        
-        /* Style Card Thống Kê & Bảng */
-        .stat-card { 
-            background: #ffffff; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px; 
-            padding: 24px; 
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
-        }
-        .stat-icon { 
-            width: 52px; 
-            height: 52px; 
-            border-radius: 12px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 26px; 
-        }
     </style>
 </head>
 <body>
 
-    <!-- 1. THANH MENU (GIỮ CHÍNH XÁC MẪU NAV BẠN GỬI) -->
+    <!-- 1. THANH MENU HEADER -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-2">
         <div class="container">
             <!-- LOGO + SLOGAN -->
@@ -129,7 +93,6 @@ if (isset($pdo) && $pdo instanceof PDO) {
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- CÁC MENU TRANG CHỦ, VIỆC LÀM, NHÀ TUYỂN DỤNG -->
                 <ul class="navbar-nav me-auto ms-4">
                     <li class="nav-item">
                         <a class="nav-link fw-semibold" href="index.php"><i class="bi bi-house-door me-1"></i> Trang chủ</a>
@@ -142,10 +105,8 @@ if (isset($pdo) && $pdo instanceof PDO) {
                     </li>
                 </ul>
 
-                <!-- NÚT TÀI KHOẢN / ĐĂNG NHẬP GÓC PHẢI -->
                 <div class="d-flex gap-2 align-items-center">
                     <?php if (!$isLoggedIn): ?>
-                        <!-- KHI CHƯA ĐĂNG NHẬP -->
                         <a href="login.php" class="btn btn-orange btn-sm px-3 shadow-sm text-white fw-semibold" style="background-color: #f39c12; border: none;">
                             <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
                         </a>
@@ -153,7 +114,6 @@ if (isset($pdo) && $pdo instanceof PDO) {
                             <i class="bi bi-person-plus me-1"></i> Đăng ký
                         </a>
                     <?php else: ?>
-                        <!-- KHI ĐÃ ĐĂNG NHẬP -->
                         <div class="dropdown">
                             <button class="btn btn-light border btn-sm dropdown-toggle fw-semibold d-flex align-items-center gap-2 px-3 rounded-pill" 
                                     type="button" 
@@ -166,14 +126,12 @@ if (isset($pdo) && $pdo instanceof PDO) {
 
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="z-index: 10002 !important;">
                                 <?php if ($isEmployer): ?>
-                                    <!-- DÀNH CHO NHÀ TUYỂN DỤNG -->
                                     <li>
                                         <a class="dropdown-item py-2 fw-semibold" href="employer_dashboard.php">
                                             <i class="bi bi-speedometer2 me-2 text-primary"></i>Trang quản lý tuyển dụng
                                         </a>
                                     </li>
                                 <?php else: ?>
-                                    <!-- DÀNH CHO ỨNG VIÊN -->
                                     <li>
                                         <a class="dropdown-item py-2 fw-semibold" href="my_applications.php">
                                             <i class="bi bi-clock-history me-2 text-primary"></i>Lịch sử nộp CV
@@ -215,34 +173,7 @@ if (isset($pdo) && $pdo instanceof PDO) {
                 </div>
             </div>
 
-            <!-- THỐNG KÊ NHANH -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <div class="stat-card shadow-sm d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-semibold d-block mb-1">Tổng Tin Đã Đăng</span>
-                            <h2 class="fw-bold text-dark m-0"><?= $totalJobs ?></h2>
-                        </div>
-                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
-                            <i class="bi bi-briefcase-fill"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="stat-card shadow-sm d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-semibold d-block mb-1">Tổng Số CV Nhận Được</span>
-                            <h2 class="fw-bold text-dark m-0"><?= $totalApplications ?></h2>
-                        </div>
-                        <div class="stat-icon bg-success bg-opacity-10 text-success">
-                            <i class="bi bi-file-earmark-person-fill"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- BẢNG DANH SÁCH TIN TUYỂN DỤNG -->
+            <!-- BẢNG DANH SÁCH TIN TUYỂN DỤNG (ĐÃ BỎ CỘT THAO TÁC) -->
             <div class="card border-0 shadow-sm rounded-3">
                 <div class="card-header bg-white py-3 border-bottom">
                     <h5 class="fw-bold text-dark m-0">
@@ -254,18 +185,17 @@ if (isset($pdo) && $pdo instanceof PDO) {
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="ps-4">#</th>
+                                    <th class="ps-4">STT</th>
                                     <th>Tiêu đề bài tuyển dụng</th>
                                     <th>Mức lương</th>
                                     <th>Hạn nộp</th>
-                                    <th>Số CV</th>
-                                    <th class="pe-4 text-end">Thao tác</th>
+                                    <th class="pe-4">Số CV</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($jobs)): ?>
                                     <tr>
-                                        <td colspan="6" class="text-center py-5 text-muted">
+                                        <td colspan="5" class="text-center py-5 text-muted">
                                             <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
                                             Bạn chưa đăng bài tuyển dụng nào trên hệ thống.
                                         </td>
@@ -288,18 +218,10 @@ if (isset($pdo) && $pdo instanceof PDO) {
                                             </td>
                                             <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($mucLuong) ?></span></td>
                                             <td class="small text-muted"><?= htmlspecialchars($hanNop) ?></td>
-                                            <td>
+                                            <td class="pe-4">
                                                 <span class="badge <?= $soCv > 0 ? 'bg-info text-dark' : 'bg-secondary' ?>">
                                                     <?= $soCv ?> CV
                                                 </span>
-                                            </td>
-                                            <td class="pe-4 text-end">
-                                                <a href="view_applicants.php?job_id=<?= $jobId ?>" class="btn btn-sm btn-outline-primary me-1">
-                                                    <i class="bi bi-people me-1"></i>Xem CV
-                                                </a>
-                                                <a href="edit_job.php?id=<?= $jobId ?>" class="btn btn-sm btn-outline-secondary">
-                                                    <i class="bi bi-pencil me-1"></i>Sửa
-                                                </a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

@@ -334,43 +334,99 @@ $jobId = $_GET['id'] ?? 1;
     </div>
 
     <!-- MODAL FORM NỘP CV (HIỆN KHI ĐÃ ĐĂNG NHẬP VÀ BẤM NỘP CV) -->
-    <?php if ($isLoggedIn): ?>
-    <div class="modal fade" id="applyModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-arrow-up me-2"></i>Nộp Hồ Sơ Ứng Tuyển</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="apply-form" action="../api/apply.php" method="POST">
-                    <div class="modal-body p-4">
-                        <input type="hidden" name="job_id" value="<?= $jobId ?>">
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-dark">Họ và tên ứng viên</label>
-                            <input type="text" class="form-control" value="<?= htmlspecialchars($userName) ?>" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-dark">Đường dẫn Google Drive / Link CV online <span class="text-danger">*</span></label>
-                            <input type="url" name="cv_url" class="form-control" placeholder="https://drive.google.com/file/d/your-cv..." required>
-                            <div class="form-text">Hãy đảm bảo bạn đã mở quyền xem công khai cho link CV này.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-dark">Ghi chú cho nhà tuyển dụng (không bắt buộc)</label>
-                            <textarea name="note" class="form-control" rows="3" placeholder="Giới thiệu ngắn gọn về bản thân hoặc kinh nghiệm của bạn..."></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy bỏ</button>
-                        <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold">Xác nhận nộp CV</button>
-                    </div>
-                </form>
+<?php if ($isLoggedIn): ?>
+<div class="modal fade" id="applyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-arrow-up me-2"></i>Nộp Hồ Sơ Ứng Tuyển</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+            <form id="apply-form" action="../api/apply.php" method="POST">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="job_id" value="<?= $jobId ?>">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Họ và tên ứng viên</label>
+                        <input type="text" class="form-control" value="<?= htmlspecialchars($userName) ?>" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Đường dẫn Google Drive / Link CV online <span class="text-danger">*</span></label>
+                        <input type="url" name="cv_url" class="form-control" placeholder="https://drive.google.com/file/d/your-cv..." required>
+                        <div class="form-text">Hãy đảm bảo bạn đã mở quyền xem công khai cho link CV này.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Ghi chú cho nhà tuyển dụng (không bắt buộc)</label>
+                        <textarea name="note" class="form-control" rows="3" placeholder="Giới thiệu ngắn gọn về bản thân hoặc kinh nghiệm của bạn..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold">Xác nhận nộp CV</button>
+                </div>
+            </form>
         </div>
     </div>
-    <?php endif; ?>
+</div>
+<?php endif; ?>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const applyForm = document.getElementById('apply-form');
+    
+    if (applyForm) {
+        applyForm.addEventListener('submit', function (e) {
+            e.preventDefault(); // Ngăn trình duyệt nhảy sang trang API
+
+            const form = this;
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            // Vô hiệu hóa nút bấm tránh spam nộp nhiều lần
+            submitBtn.disabled = true;
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = 'Đang gửi...';
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
+
+                if (data.status === 'success') {
+                    // 1. Đóng Modal nộp CV
+                    const modalElement = document.getElementById('applyModal');
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    }
+
+                    // 2. Hiển thị thông báo thành công
+                    alert(data.message);
+
+                    // 3. Đặt lại thông tin Form về rỗng
+                    form.reset();
+                } else {
+                    alert('⚠️ ' + data.message);
+                }
+            })
+            .catch(error => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
+                alert('❌ Có lỗi xảy ra trong quá trình gửi, vui lòng thử lại!');
+            });
+        });
+    }
+});
+</script>
+
+    
 
     <!-- 3. FOOTER CHUẨN DỰ ÁN -->
     <footer class="bg-dark text-white py-4 mt-auto">
