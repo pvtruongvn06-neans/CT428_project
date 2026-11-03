@@ -1,197 +1,125 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// 1. KẾT NỐI CƠ SỞ DỮ LIỆU & HÀM TIỆN ÍCH
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../include/functions.php';
+require_once __DIR__ . '/../include/auth_check.php';
 
-// Nếu đã đăng nhập rồi thì chuyển hướng về Trang chủ
-if (isset($_SESSION['user_id'])) {
+// Nếu đã đăng nhập thì chuyển hướng về Trang chủ
+if (isLoggedIn()) {
     header('Location: index.php');
-    exit;
+    exit();
 }
 
 // Lấy trang cần chuyển hướng sau khi đăng nhập thành công (nếu có)
-$redirect = $_GET['redirect'] ?? 'index.php';
+$redirect = isset($_GET['redirect']) ? sanitizeInput($_GET['redirect']) : 'index.php';
+
+// 2. THIẾT LẬP TIÊU ĐỀ & NHÚNG HEADER DÙNG CHUNG
+$pageTitle = "Đăng Nhập";
+require_once __DIR__ . '/../include/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="vi">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Nhập – Jobio</title>
-    <link rel="icon" type="image/png" href="../assets/images/icon.png?v=2">
-
-    <!-- Bootstrap 5 & Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
-
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .auth-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(13, 59, 102, 0.08);
-            overflow: hidden;
-        }
-
-        .auth-header {
-            background: linear-gradient(135deg, #0a2540 0%, #12518e 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .btn-orange {
-            background-color: #f39c12;
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .btn-orange:hover {
-            background-color: #e08e0b;
-            color: #fff;
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- NAVBAR NGẮN GỌN -->
-    <nav class="navbar navbar-light bg-white border-bottom py-2">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="index.php">
-                <img src="../assets/images/icon.png?v=2" alt="Logo Jobio" width="40" height="40" class="me-2">
-                <div>
-                    <span class="lh-1 fw-bold text-dark" style="color: #0d3b66 !important;">JOBIO</span>
-                    <span class="small text-muted d-block" style="font-size: 11px;">Input Talent, Output Success</span>
+<!-- FORM ĐĂNG NHẬP -->
+<div class="container py-5 my-auto">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="bg-white border shadow-sm" style="border-radius: 12px 2px 12px 2px; border-color: var(--sky-cloud) !important; overflow: hidden;">
+                
+                <!-- Header Thẻ Đăng Nhập Gradient Ocean Pastel -->
+                <div class="p-4 text-center text-white" style="background: linear-gradient(135deg, var(--veranda-blue) 0%, var(--cupid-pink) 100%);">
+                    <h4 class="fw-bold m-0">ĐĂNG NHẬP</h4>
+                    <small class="text-white-50">Chào mừng bạn quay lại với Jobio</small>
                 </div>
-            </a>
-            <a href="index.php" class="text-decoration-none text-muted fw-semibold small">
-                <i class="bi bi-arrow-left me-1"></i> Trang chủ
-            </a>
-        </div>
-    </nav>
 
-    <!-- FORM ĐĂNG NHẬP -->
-    <div class="container my-auto py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-5 col-lg-4">
-                <div class="auth-card">
-                    <div class="auth-header">
-                        <!-- <img src="../assets/images/icon.png?v=2" alt="Logo Jobio" width="55" height="55" class="mb-2"> -->
-                        <h4 class="fw-bold m-0">ĐĂNG NHẬP</h4>
-                        <small class="text-white-50">Chào mừng bạn quay lại với Jobio</small>
-                    </div>
+                <div class="p-4">
+                    <!-- Thông báo lỗi/thành công từ JS -->
+                    <div id="auth-alert" class="d-none alert py-2 fs-7 mb-3" style="border-radius: 6px 2px 6px 2px;"></div>
 
-                    <div class="p-4">
-                        <!-- Thông báo lỗi/thành công từ JS -->
-                        <div id="auth-alert" class="d-none alert py-2 fs-7 mb-3"></div>
+                    <form id="login-form" action="../api/auth.php?action=login" method="POST">
+                        <input type="hidden" name="redirect" value="<?= htmlspecialchars($redirect) ?>">
 
-                        <form id="login-form" action="../api/auth.php?action=login" method="POST">
-                            <input type="hidden" name="redirect" value="<?= htmlspecialchars($redirect) ?>">
-
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold text-dark small">Địa chỉ Email <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light text-muted"><i class="bi bi-envelope"></i></span>
-                                    <input type="email" name="email" class="form-control" placeholder="example@gmail.com" required>
-                                </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Địa chỉ Email <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" class="form-control border-start-0" placeholder="example@gmail.com" required>
                             </div>
-
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <label class="form-label fw-semibold text-dark small mb-0">Mật khẩu <span class="text-danger">*</span></label>
-                                    <a href="#" class="text-decoration-none small text-muted" onclick="alert('Vui lòng liên hệ Quản trị viên để khôi phục mật khẩu.');">Quên mật khẩu?</a>
-                                </div>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
-                                    <input type="password" name="mat_khau" class="form-control" placeholder="••••••••" required>
-                                </div>
-                            </div>
-
-                            <!-- <div class="form-check mb-4">
-                                <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                                <label class="form-check-input-label small text-muted" for="remember">
-                                    Ghi nhớ đăng nhập
-                                </label>
-                            </div> -->
-
-                            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-3 shadow-sm mb-3" style="background-color: #0d3b66; border: none;">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
-                            </button>
-                        </form>
-
-                        <div class="text-center pt-2 border-top">
-                            <span class="small text-muted">Chưa có tài khoản?</span>
-                            <a href="register.php" class="small fw-semibold text-decoration-none ms-1" style="color: #0284c7;">Đăng ký ngay</a>
                         </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-semibold text-dark small mb-0">Mật khẩu <span class="text-danger">*</span></label>
+                                <a href="javascript:void(0)" class="text-decoration-none small text-muted" onclick="alert('Vui lòng liên hệ Quản trị viên để khôi phục mật khẩu.');">Quên mật khẩu?</a>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="mat_khau" class="form-control border-start-0" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-rose w-100 py-2 fw-semibold shadow-sm mb-3">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                        </button>
+                    </form>
+
+                    <div class="text-center pt-3 border-top">
+                        <span class="small text-muted">Chưa có tài khoản?</span>
+                        <a href="register.php" class="small fw-semibold text-decoration-none ms-1 text-cupid">Đăng ký ngay</a>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
+</div>
 
-    <!-- FOOTER -->
-    <footer class="bg-dark text-white py-3 mt-auto">
-        <div class="container text-center">
-            <small class="text-white-50">&copy; 2026 Jobio Recruitment Portal. All rights reserved.</small>
-        </div>
-    </footer>
+<!-- XỬ LÝ ĐĂNG NHẬP VIA API -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const loginForm = document.getElementById('login-form');
+    const alertBox  = document.getElementById('auth-alert');
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/auth.js"></script>
-    <!-- Đặt ở cuối file views/login.php -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-        const loginForm = document.getElementById('login-form');
-        const alertBox = document.getElementById('auth-alert');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(loginForm);
 
-        if (loginForm) {
-            loginForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                const formData = new FormData(loginForm);
-
-                fetch('../api/auth.php?action=login', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        if (alertBox) {
-                            alertBox.className = 'alert alert-success py-2 fs-7 mb-3';
-                            alertBox.textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
-                        }
-                        // TỰ ĐỘNG CHUYỂN HƯỚNG TỚI TRẠNG QUẢN LÝ (employer_dashboard.php) NẾU LÀ NTD
-                        setTimeout(() => {
-                            window.location.href = data.redirect || 'index.php';
-                        }, 500);
-                    } else {
-                        if (alertBox) {
-                            alertBox.className = 'alert alert-danger py-2 fs-7 mb-3';
-                            alertBox.textContent = data.message || 'Đăng nhập thất bại!';
-                        }
+            fetch('../api/auth.php?action=login', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (alertBox) {
+                        alertBox.className = 'alert py-2 fs-7 mb-3 d-block';
+                        alertBox.style.backgroundColor = 'var(--lychee)';
+                        alertBox.style.color = 'var(--veranda-blue)';
+                        alertBox.style.borderColor = 'var(--veranda-blue)';
+                        alertBox.textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
                     }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert('Có lỗi xảy ra, vui lòng thử lại!');
-                });
+                    setTimeout(() => {
+                        window.location.href = data.redirect || 'index.php';
+                    }, 500);
+                } else {
+                    if (alertBox) {
+                        alertBox.className = 'alert alert-danger py-2 fs-7 mb-3 d-block';
+                        alertBox.textContent = data.message || 'Đăng nhập thất bại!';
+                    }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                if (alertBox) {
+                    alertBox.className = 'alert alert-danger py-2 fs-7 mb-3 d-block';
+                    alertBox.textContent = 'Có lỗi xảy ra, vui lòng thử lại!';
+                }
             });
-        }
-    });
-    </script>
+        });
+    }
+});
+</script>
 
-</body>
-
-</html>
+<?php
+// 3. NHÚNG FOOTER DÙNG CHUNG
+require_once __DIR__ . '/../include/footer.php';
+?>
