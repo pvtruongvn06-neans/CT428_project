@@ -1,186 +1,524 @@
+/* ==========================================================
+   JOBIO THEME CONFIGURATION - OCEAN PASTEL PALETTE
+   Colors from image:
+   - Veranda Blue : #6BB1AD
+   - Sky Cloud    : #A7BCBD
+   - Lychee       : #EDECDB
+   - Melon        : #E5A9A9
+   - Cupid Pink   : #E6748E
+   ========================================================== */
 
-        html { scroll-behavior: smooth; } /* Cuộn trang mượt mà */
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Arial, sans-serif; }
-        
-        /* Navbar */
-        .navbar-brand { font-weight: 900; font-size: 22px; color: #0d3b66 !important; letter-spacing: 0.5px; }
-        .brand-slogan-sm { font-size: 11px; color: #6c757d; font-weight: 500; font-style: italic; display: block; }
-        .nav-link { font-weight: 600; color: #333 !important; font-size: 14px; margin-right: 5px; }
-        .nav-link:hover { color: #0284c7 !important; }
-        .btn-orange { background-color: #f39c12; color: #fff; font-weight: 600; }
-        .btn-orange:hover { background-color: #e08e0b; color: #fff; }
+:root {
+    /* 1. Bảng màu chính theo ảnh */
+    --veranda-blue: #6BB1AD;       /* Xanh mây biển */
+    --sky-cloud:    #A7BCBD;       /* Xanh xám nhạt */
+    --lychee:       #EDECDB;       /* Trắng kem vải */
+    --melon:        #E5A9A9;       /* Hồng dưa lưới nhạt */
+    --cupid-pink:   #E6748E;       /* Hồng Cupid chủ đạo */
+    
+    /* 2. Biến màu phái sinh & Hover */
+    --cupid-hover:  #d45973;       /* Hồng đậm khi hover */
+    --veranda-hover:#559d99;       /* Xanh đậm khi hover */
+    --text-main:    #2d3748;       /* Chữ tối chính */
+    --text-muted:   #64748b;       /* Chữ xám phụ */
+    
+    /* 3. Đánh ánh xạ sang hệ thống theme cũ */
+    --primary-rose:       var(--cupid-pink);
+    --primary-rose-hover: var(--cupid-hover);
+    --rose-dark:          #b5475e;
+    --rose-soft:          #fcf0f2;
+    --rose-border:        var(--melon);
+    --rose-text:          var(--cupid-pink);
+}
 
-        /* Hero Banner */
-        .hero-banner { 
-            background: linear-gradient(135deg, #0a2540 0%, #12518e 100%); 
-            color: white; 
-            padding: 55px 0 50px 0; 
-        }
-        .hero-brand-name { font-weight: 900; font-size: 42px; letter-spacing: 1px; color: #ffffff; }
-        .hero-slogan { color: #41b6ff; font-weight: 600; font-style: italic; font-size: 18px; letter-spacing: 0.5px; }
-        
-        /* Box tìm kiếm bo tròn */
-        .search-container {
-            background: #ffffff;
-            border-radius: 50px;
-            padding: 6px 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-        }
-        .search-input { border: none; box-shadow: none !important; font-size: 15px; }
-        .search-select { border: none; border-left: 1px solid #e2e8f0; border-radius: 0; box-shadow: none !important; font-size: 14px; color: #555; }
+html { 
+    scroll-behavior: smooth; 
+}
 
-        /* Stats Section */
-        .stats-section { background-color: #ffffff; border-bottom: 1px solid #e2e8f0; }
-        .stats-number { font-size: 32px; font-weight: 800; color: #0d3b66; }
-        .stats-label { font-size: 14px; font-weight: 600; color: #6c757d; }
+body { 
+    background-color: #faf9f6; 
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-main);
+}
 
-        /* Khung tròn Icon */
-        .feature-icon-box {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: 2px solid #0d3b66;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px auto;
-            color: #0d3b66;
-            background-color: #ffffff;
-            flex-shrink: 0;
-            transition: all 0.3s ease;
-        }
-        .feature-card:hover .feature-icon-box {
-            background-color: #0d3b66;
-            color: #ffffff;
-            transform: translateY(-3px);
-        }
+.main-content { 
+    flex: 1; 
+}
 
-        /* Tiêu đề mục */
-        .section-title-main { font-weight: 800; color: #0d3b66; text-transform: uppercase; letter-spacing: 0.5px; }
-        .section-subtitle-main { color: #6c757d; font-size: 15px; }
+/* ==========================================
+   1. NAVBAR & PHẦN ĐĂNG NHẬP | ĐĂNG KÝ PHẲNG
+   ========================================== */
+nav.navbar { 
+    position: sticky !important; 
+    top: 0 !important; 
+    z-index: 10000 !important; 
+    overflow: visible !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid var(--sky-cloud);
+}
 
-        /* KHỐI NHÀ TUYỂN DỤNG HÀNG ĐẦU (4 Ô MẪU DÒNG NGANG KHỚP ẢNH MẪU) */
-        .top-employer-card {
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 20px 15px;
-            text-align: center;
-            transition: all 0.25s ease-in-out;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .top-employer-card:hover {
-            box-shadow: 0 8px 20px rgba(13, 59, 102, 0.08);
-            border-color: #0284c7;
-            transform: translateY(-3px);
-        }
-        .top-employer-logo {
-            width: 65px;
-            height: 65px;
-            background-color: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #0d3b66;
-            font-size: 28px;
-            margin-bottom: 12px;
-        }
-        .top-employer-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: #0d3b66;
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-        .top-employer-count {
-            font-size: 12.5px;
-            color: #0284c7;
-            font-weight: 600;
-            background-color: #e7f1ff;
-            padding: 3px 10px;
-            border-radius: 12px;
-            display: inline-block;
-        }
+.navbar-brand { 
+    font-weight: 900; 
+    font-size: 22px; 
+    color: var(--cupid-pink) !important; 
+    letter-spacing: 0.5px; 
+}
 
-        /* Thẻ việc làm nổi bật (Tông màu Jobio) */
-        .job-featured-card {
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            position: relative;
-            transition: all 0.25s ease-in-out;
-            height: 100%;
-        }
-        .job-featured-card:hover {
-            box-shadow: 0 8px 20px rgba(13, 59, 102, 0.08);
-            border-color: #0284c7;
-            transform: translateY(-3px);
-        }
-        .job-logo-box {
-            width: 70px;
-            height: 70px;
-            background-color: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #0d3b66;
-            font-size: 26px;
-            transition: all 0.25s ease;
-        }
-        .job-featured-card:hover .job-logo-box {
-            background-color: #e7f1ff;
-            border-color: #0284c7;
-            color: #0284c7;
-        }
-        .job-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #0d3b66;
-            margin-bottom: 3px;
-            line-height: 1.3;
-            text-decoration: none;
-            display: block;
-        }
-        .job-title:hover { color: #0284c7; }
-        .job-company {
-            font-size: 13.5px;
-            color: #6c757d;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-        .job-salary {
-            font-size: 14px;
-            font-weight: 700;
-            color: #e08e0b;
-            margin-bottom: 3px;
-        }
-        .job-location {
-            font-size: 13px;
-            color: #6c757d;
-        }
-        .job-heart-btn {
-            position: absolute;
-            bottom: 16px;
-            right: 18px;
-            color: #adb5bd;
-            font-size: 17px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .job-heart-btn:hover {
-            color: #dc3545;
-            transform: scale(1.2);
-        }
+.brand-slogan-sm { 
+    font-size: 11px; 
+    color: var(--text-muted); 
+    font-weight: 500; 
+    font-style: italic; 
+    display: block; 
+}
+
+.nav-link { 
+    font-weight: 600; 
+    color: var(--text-main) !important; 
+    font-size: 14.5px; 
+    margin-right: 5px; 
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active-rose { 
+    color: var(--cupid-pink) !important; 
+    font-weight: 700 !important;
+}
+
+/* Kiểu chữ phẳng Đăng nhập | Đăng ký có hiệu ứng hover mượt */
+.auth-header-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nav-auth-link {
+    color: var(--text-main) !important;
+    font-weight: 600;
+    font-size: 14.5px;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 8px 2px 8px 2px;
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+}
+
+.nav-auth-link:hover {
+    color: var(--cupid-pink) !important;
+    background-color: var(--lychee);
+    transform: translateY(-1px);
+}
+
+.auth-divider {
+    color: var(--sky-cloud);
+    font-weight: 300;
+    font-size: 15px;
+    user-select: none;
+}
+
+.dropdown-menu { 
+    z-index: 10002 !important; 
+    border-radius: 12px 2px 12px 12px !important;
+    border-color: var(--sky-cloud) !important;
+}
+
+/* ==========================================
+   2. BUTTONS & UTILITIES
+   ========================================== */
+.btn-rose, .btn-orange { 
+    background-color: var(--cupid-pink); 
+    color: #ffffff !important; 
+    font-weight: 600;
+    border: none;
+    border-radius: 8px 2px 8px 2px;
+    transition: all 0.25s ease;
+}
+
+.btn-rose:hover, .btn-orange:hover { 
+    background-color: var(--cupid-hover); 
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(230, 116, 142, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-outline-rose {
+    border: 1.5px solid var(--cupid-pink);
+    color: var(--cupid-pink);
+    font-weight: 600;
+    border-radius: 8px 2px 8px 2px;
+    transition: all 0.25s ease;
+}
+
+.btn-outline-rose:hover {
+    background-color: var(--cupid-pink);
+    color: #ffffff;
+}
+
+/* Các class tiện ích bảng màu mới */
+.text-cupid   { color: var(--cupid-pink) !important; }
+.text-veranda { color: var(--veranda-blue) !important; }
+.bg-veranda   { background-color: var(--veranda-blue) !important; color: #fff !important; }
+.bg-lychee    { background-color: var(--lychee) !important; color: var(--text-main) !important; }
+.bg-melon     { background-color: var(--melon) !important; color: #fff !important; }
+
+/* ==========================================
+   3. HERO BANNER & SEARCH CONTAINER
+   ========================================== */
+.hero-banner { 
+    background: linear-gradient(135deg, #4A8C89 0%, #6BB1AD 40%, #E5A9A9 80%, #E6748E 100%); 
+    color: white; 
+    padding: 55px 0 50px 0; 
+}
+
+.hero-brand-name { 
+    font-weight: 900; 
+    font-size: 42px; 
+    letter-spacing: 1px; 
+    color: #ffffff; 
+}
+
+.hero-slogan { 
+    color: var(--lychee); 
+    font-weight: 600; 
+    font-style: italic; 
+    font-size: 18px; 
+    letter-spacing: 0.5px; 
+}
+
+.search-container {
+    background: #ffffff;
+    border-radius: 16px 4px 16px 4px;
+    padding: 8px 14px;
+    box-shadow: 0 12px 30px rgba(107, 177, 173, 0.18);
+    border: 1px solid var(--sky-cloud);
+}
+
+.search-input { 
+    border: none; 
+    box-shadow: none !important; 
+    font-size: 15px; 
+}
+
+.search-select { 
+    border: none; 
+    border-left: 1px solid var(--sky-cloud); 
+    border-radius: 0; 
+    box-shadow: none !important; 
+    font-size: 14px; 
+    color: #555; 
+}
+
+/* ==========================================
+   4. STATS SECTION & FEATURE ICONS
+   ========================================== */
+.stats-section { 
+    background-color: #ffffff; 
+    border-bottom: 1px solid var(--sky-cloud); 
+}
+
+.stats-number { 
+    font-size: 32px; 
+    font-weight: 800; 
+    color: var(--cupid-pink); 
+}
+
+.stats-label { 
+    font-size: 14px; 
+    font-weight: 600; 
+    color: var(--text-muted); 
+}
+
+.feature-icon-box {
+    width: 65px;
+    height: 65px;
+    border-radius: 16px 4px 16px 4px;
+    border: 2px solid var(--veranda-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+    color: var(--veranda-blue);
+    background-color: rgba(107, 177, 173, 0.12);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon-box {
+    background-color: var(--veranda-blue);
+    color: #ffffff;
+    transform: translateY(-4px) rotate(-3deg);
+}
+
+.section-title-main { 
+    font-weight: 800; 
+    color: var(--text-main); 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+}
+
+.section-subtitle-main { 
+    color: var(--text-muted); 
+    font-size: 15px; 
+}
+
+/* ==========================================
+   5. TOP EMPLOYERS CARD
+   ========================================== */
+.top-employer-card {
+    background-color: #ffffff;
+    border: 1px solid var(--sky-cloud);
+    border-top: 3px solid var(--cupid-pink);
+    border-radius: 12px 2px 12px 2px;
+    padding: 20px 15px;
+    text-align: center;
+    transition: all 0.25s ease-in-out;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.top-employer-card:hover {
+    box-shadow: 0 10px 25px rgba(230, 116, 142, 0.15);
+    border-color: var(--cupid-pink);
+    transform: translateY(-4px);
+}
+
+.top-employer-logo {
+    width: 65px;
+    height: 65px;
+    background-color: var(--lychee);
+    border: 1px solid var(--sky-cloud);
+    border-radius: 12px 2px 12px 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cupid-pink);
+    font-size: 28px;
+    margin-bottom: 12px;
+}
+
+.top-employer-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+
+.top-employer-count {
+    font-size: 12.5px;
+    color: var(--text-main);
+    font-weight: 600;
+    background-color: var(--lychee);
+    padding: 4px 12px;
+    border-radius: 6px 2px 6px 2px;
+    display: inline-block;
+}
+
+/* ==========================================
+   6. FEATURED JOB CARD
+   ========================================== */
+.job-featured-card {
+    background-color: #ffffff;
+    border: 1px solid var(--sky-cloud);
+    border-left: 4px solid var(--veranda-blue);
+    border-radius: 12px 2px 12px 2px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    transition: all 0.25s ease-in-out;
+    height: 100%;
+}
+
+.job-featured-card:hover {
+    box-shadow: 0 10px 25px rgba(107, 177, 173, 0.2);
+    border-color: var(--veranda-blue);
+    transform: translateY(-3px);
+}
+
+.job-logo-box {
+    width: 65px;
+    height: 65px;
+    background-color: rgba(107, 177, 173, 0.12);
+    border: 1px solid var(--sky-cloud);
+    border-radius: 10px 2px 10px 2px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--veranda-blue);
+    font-size: 26px;
+    transition: all 0.25s ease;
+}
+
+.job-featured-card:hover .job-logo-box {
+    background-color: var(--veranda-blue);
+    color: #ffffff;
+    border-color: var(--veranda-blue);
+}
+
+.job-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 3px;
+    line-height: 1.3;
+    text-decoration: none;
+    display: block;
+}
+
+.job-title:hover { 
+    color: var(--cupid-pink); 
+}
+
+.job-company {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.job-salary {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cupid-pink);
+    margin-bottom: 3px;
+}
+
+.job-location {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.job-heart-btn {
+    position: absolute;
+    bottom: 16px;
+    right: 18px;
+    color: var(--sky-cloud);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.job-heart-btn:hover {
+    color: var(--cupid-pink);
+    transform: scale(1.25);
+}
+
+/* ==========================================
+   7. DASHBOARD STAT CARDS & CARD CHỌN ĐĂNG KÝ
+   ========================================== */
+.stat-card { 
+    background: #ffffff; 
+    border: 1px solid var(--sky-cloud); 
+    border-left: 4px solid var(--cupid-pink);
+    border-radius: 12px 2px 12px 2px; 
+    padding: 24px; 
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+}
+
+.stat-icon { 
+    width: 52px; 
+    height: 52px; 
+    border-radius: 10px 2px 10px 2px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 26px; 
+}
+
+.auth-choice-card {
+    background: #ffffff;
+    border: 1px solid var(--sky-cloud);
+    border-radius: 12px 2px 12px 2px;
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s ease;
+}
+
+.auth-choice-card:hover {
+    border-color: var(--cupid-pink);
+    box-shadow: 0 8px 20px rgba(230, 116, 142, 0.15);
+}
+
+.auth-choice-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px 2px 12px 2px;
+    background-color: var(--lychee);
+    color: var(--cupid-pink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    margin: 0 auto 16px auto;
+}
+
+/* ==========================================
+   8. EMPLOYER DETAIL & AUTH REQUIRED CARD
+   ========================================== */
+.auth-required-card {
+    background: #ffffff;
+    border: 1px solid var(--sky-cloud);
+    border-radius: 12px 2px 12px 2px;
+    padding: 45px 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    max-width: 620px;
+    margin: 50px auto;
+    text-align: center;
+}
+
+.lock-icon-box {
+    width: 80px;
+    height: 80px;
+    background-color: var(--lychee);
+    color: var(--cupid-pink);
+    border-radius: 12px 2px 12px 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    margin: 0 auto 20px auto;
+}
+
+.company-cover {
+    height: 160px;
+    background: linear-gradient(135deg, #4A8C89 0%, #6BB1AD 40%, #E5A9A9 80%, #E6748E 100%);
+}
+
+.company-header-card {
+    background: #ffffff;
+    border: 1px solid var(--sky-cloud);
+    border-radius: 12px 2px 12px 2px;
+    padding: 25px 30px;
+    margin-top: -50px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+.company-logo-large {
+    width: 95px;
+    height: 95px;
+    background-color: var(--lychee);
+    border: 1px solid var(--sky-cloud);
+    border-radius: 12px 2px 12px 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cupid-pink);
+    font-size: 42px;
+    flex-shrink: 0;
+}
