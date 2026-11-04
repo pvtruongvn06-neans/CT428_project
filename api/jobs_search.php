@@ -23,7 +23,8 @@ try {
     $params = [];
 
     if ($keyword !== '') {
-        $sql .= " AND (t.TieuDe LIKE :keyword OR t.MoTa LIKE :keyword)";
+        // Thêm u.HoTen LIKE :keyword để tìm được cả theo tên công ty / nhà tuyển dụng
+        $sql .= " AND (t.TieuDe LIKE :keyword OR t.MoTa LIKE :keyword OR u.HoTen LIKE :keyword)";
         $params['keyword'] = "%$keyword%";
     }
 
