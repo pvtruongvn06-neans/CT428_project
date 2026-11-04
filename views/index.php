@@ -3,131 +3,49 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Lấy thông tin trạng thái đăng nhập
+// 1. NHÚNG FILE CẤU HÌNH & HÀM TIỆN ÍCH (Dùng ../ để ra ngoài thư mục views)
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../include/functions.php';
+
+// 2. KHỞI TẠO VÀ LẤY TRẠNG THÁI ĐĂNG NHẬP (Chống lỗi Undefined variable)
 $isLoggedIn = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
 $userRole   = strtolower(trim($_SESSION['vai_tro'] ?? $_SESSION['role'] ?? ''));
-
-// Kiểm tra vai trò Nhà tuyển dụng
 $isEmployer = $isLoggedIn && (
     strpos($userRole, 'tuyen') !== false || 
     strpos($userRole, 'employer') !== false || 
     $userRole === 'nha_tuyen_dung'
 );
+$userName   = $_SESSION['ho_ten'] ?? $_SESSION['user_name'] ?? 'Bạn';
 
-$userName = $_SESSION['ho_ten'] ?? $_SESSION['user_name'] ?? 'Tài khoản';
+// 3. PHÂN QUYỀN: Nhà tuyển dụng đăng nhập -> Tự động chuyển hướng sang trang quản lý
+if ($isLoggedIn && $isEmployer) {
+    header('Location: employer_dashboard.php');
+    exit();
+}
+
+// 4. LẤY TỪ KHÓA & ĐỊA ĐIỂM TÌM KIẾM TỪ URL
+$keyword  = isset($_GET['keyword']) ? sanitizeInput($_GET['keyword']) : '';
+$location = isset($_GET['location']) ? sanitizeInput($_GET['location']) : '';
+
+// 5. NHÚNG HEADER DÙNG CHUNG
+$pageTitle = "Trang Chủ – Nền Tảng Tuyển Dụng Jobio";
+require_once __DIR__ . '/../include/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jobio – Input Talent, Output Success</title>
-    <link rel="icon" type="image/png" href="../assets/images/icon.png?v=2">
-
-    <!-- Bootstrap 5 & Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
-
-</head>
-
-<body>
-
-    <!-- 1. THANH MENU (HEADER TÍCH HỢP PHÂN QUYỀN) -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-2">
+<?php if ($isLoggedIn): ?>
+    <!-- ========================================================================= -->
+    <!-- TRẠNG THÁI 1: ỨNG VIÊN ĐÃ ĐĂNG NHẬP (Giao diện tinh gọn, ẩn phần thừa)    -->
+    <!-- ========================================================================= -->
+    <section class="hero-banner py-4 text-center">
         <div class="container">
-            <!-- LOGO + SLOGAN -->
-            <a class="navbar-brand d-flex align-items-center" href="index.php">
-                <img src="../assets/images/icon.png?v=2" alt="Logo Jobio" width="40" height="40" class="me-2">
-                <div class="d-flex flex-column">
-                    <span class="fw-bold fs-4 lh-1" style="color: #0b4b8b;">JOBIO</span>
-                    <span class="fst-italic text-secondary" style="font-size: 0.75rem;">Input Talent, Output Success</span>
-                </div>
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- CÁC MENU TRANG CHỦ, VIỆC LÀM, NHÀ TUYỂN DỤNG -->
-                <ul class="navbar-nav me-auto ms-4">
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="index.php"><i class="bi bi-house-door me-1"></i> Trang chủ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="job_list.php"><i class="bi bi-briefcase me-1"></i> Việc làm</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active fw-semibold text-primary" href="employers.php"><i class="bi bi-building me-1"></i> Nhà tuyển dụng</a>
-                    </li>
-                </ul>
+            <h3 class="fw-bold text-white mb-1">
+                Xin chào, <span style="color: var(--lychee);"><?= htmlspecialchars($userName) ?></span>! 👋
+            </h3>
+            <p class="hero-slogan mb-4" style="font-size: 0.95rem;">Hôm nay bạn muốn tìm kiếm cơ hội nghề nghiệp nào?</p>
 
-                <!-- NÚT TÀI KHOẢN / ĐĂNG NHẬP GÓC PHẢI -->
-                <div class="d-flex gap-2 align-items-center">
-                    <?php if (!$isLoggedIn): ?>
-                        <!-- KHI CHƯA ĐĂNG NHẬP -->
-                        <a href="login.php" class="btn btn-orange btn-sm px-3 shadow-sm text-white fw-semibold" style="background-color: #f39c12; border: none;">
-                            <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
-                        </a>
-                        <a href="register.php?role=candidate" class="btn btn-outline-primary btn-sm fw-semibold">
-                            <i class="bi bi-person-plus me-1"></i> Đăng ký
-                        </a>
-                    <?php else: ?>
-                        <!-- KHI ĐÃ ĐĂNG NHẬP -->
-                        <div class="dropdown">
-                            <button class="btn btn-light border btn-sm dropdown-toggle fw-semibold d-flex align-items-center gap-2 px-3 rounded-pill" 
-                                    type="button" 
-                                    data-bs-toggle="dropdown" 
-                                    data-bs-display="static" 
-                                    aria-expanded="false">
-                                <i class="bi <?= $isEmployer ? 'bi-building text-warning' : 'bi-person-circle text-primary' ?> fs-6"></i>
-                                <span><?= htmlspecialchars($userName) ?></span>
-                            </button>
-
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="z-index: 10002 !important;">
-                                <?php if ($isEmployer): ?>
-                                    <!-- DÀNH CHO NHÀ TUYỂN DỤNG -->
-                                    <li>
-                                        <a class="dropdown-item py-2 fw-semibold" href="employer_dashboard.php">
-                                            <i class="bi bi-speedometer2 me-2 text-primary"></i>Trang quản lý tuyển dụng
-                                        </a>
-                                    </li>
-                                <?php else: ?>
-                                    <!-- DÀNH CHO ỨNG VIÊN -->
-                                    <li>
-                                        <a class="dropdown-item py-2 fw-semibold" href="my_applications.php">
-                                            <i class="bi bi-clock-history me-2 text-primary"></i>Lịch sử nộp CV
-                                        </a>
-                                    </li>
-                                <?php endif; ?>
-
-                                <li><hr class="dropdown-divider"></li>
-
-                                <li>
-                                    <a class="dropdown-item text-danger fw-semibold py-2" href="javascript:void(0)" onclick="handleLogout(event)">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- 2. KHU VỰC HERO BANNER (ĐIỀU HƯỚNG TÌM KIẾM SANG job_list.php) -->
-    <section class="hero-banner text-center">
-        <div class="container">
-            <h1 class="hero-brand-name mb-1">JOBIO</h1>
-            <p class="hero-slogan mb-4">Input Talent, Output Success</p>
-
-            <div class="row justify-content-center">
-                <div class="col-lg-9">
-                    <form action="job_list.php" method="GET">
+            <form action="job_list.php" method="GET" onsubmit="if(!this.keyword.value.trim()) { event.preventDefault(); }">
+                <div class="row justify-content-center">
+                    <div class="col-lg-9">
                         <div class="search-container d-flex align-items-center">
                         <i class="bi bi-search text-muted fs-5 ms-2 me-2"></i>
     
@@ -151,290 +69,325 @@ $userName = $_SESSION['ho_ten'] ?? $_SESSION['user_name'] ?? 'Tài khoản';
         <i class="bi bi-search me-1"></i> Tìm kiếm
     </button>
 </div>
+                            <i class="bi bi-search fs-5 ms-2 me-2" style="color: var(--veranda-blue);"></i>
+                            <input type="text" name="keyword" class="form-control search-input" placeholder="Tên công việc, vị trí, kỹ năng..." value="<?= htmlspecialchars($keyword) ?>">
+                            
+                            <div class="d-none d-md-block flex-shrink-0 me-2" style="width: 180px;">
+                                <select class="form-select search-select" name="location">
+                                    <option value="">📍 Địa điểm</option>
+                                    <option value="Cần Thơ" <?= $location === 'Cần Thơ' ? 'selected' : '' ?>>Cần Thơ</option>
+                                    <option value="TP.HCM" <?= $location === 'TP.HCM' ? 'selected' : '' ?>>TP. Hồ Chí Minh</option>
+                                    <option value="Hà Nội" <?= $location === 'Hà Nội' ? 'selected' : '' ?>>Hà Nội</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-rose px-4 py-2 fw-semibold flex-shrink-0">
+                                <i class="bi bi-search me-1"></i> Tìm việc ngay
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </section>
 
-    <!-- 4. KHỐI NỘI DUNG 1: VÌ SAO NÊN CHỌN JOBIO? -->
-    <section class="py-5 bg-white border-bottom">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h3 class="section-title-main">Vì sao nên chọn Jobio?</h3>
-                <p class="section-subtitle-main">Giải pháp kết nối tuyển dụng hiệu quả, trực quan và tối ưu nhất</p>
-            </div>
-
-            <div class="row g-4 text-center">
-                <div class="col-md-4 feature-card">
-                    <div class="p-3">
-                        <div class="feature-icon-box">
-                            <i class="bi bi-journal-plus fs-2"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-2">ĐĂNG TIN TUYỂN DỤNG</h6>
-                        <p class="text-muted fs-7">Nhà tuyển dụng khởi tạo và quản lý các tin tuyển dụng dễ dàng với thông tin vị trí, yêu cầu và hạn nộp rõ ràng.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 feature-card">
-                    <div class="p-3">
-                        <div class="feature-icon-box">
-                            <i class="bi bi-file-earmark-text fs-2"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-2">NỘP HỒ SƠ ỨNG TUYỂN</h6>
-                        <p class="text-muted fs-7">Ứng viên dễ dàng tra cứu công việc phù hợp và gửi đường dẫn CV trực tiếp đến doanh nghiệp chỉ với 1 thao tác.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 feature-card">
-                    <div class="p-3">
-                        <div class="feature-icon-box">
-                            <i class="bi bi-clock-history fs-2"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-2">THEO DÕI TRẠNG THÁI</h6>
-                        <p class="text-muted fs-7">Cập nhật tiến độ xử lý hồ sơ minh bạch giữa Ứng viên và Nhà tuyển dụng (Đã nộp, Đã duyệt, Từ chối).</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 3. KHỐI THỐNG KÊ HỆ THỐNG -->
-    <section class="stats-section py-4">
-        <div class="container">
-            <div class="row g-3 text-center">
-                <div class="col-md-4">
-                    <div class="p-2">
-                        <div class="stats-number"><i class="bi bi-briefcase text-primary me-2"></i>100+</div>
-                        <div class="stats-label">Tin Tuyển Dụng Đang Mở</div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="p-2 border-start border-end">
-                        <div class="stats-number text-success"><i class="bi bi-file-earmark-person me-2"></i>500+</div>
-                        <div class="stats-label">Hồ Sơ CV / Ứng Viên</div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="p-2">
-                        <div class="stats-number text-warning"><i class="bi bi-building me-2"></i>50+</div>
-                        <div class="stats-label">Nhà Tuyển Dụng Đồng Hành</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    <!-- 5. KHỐI NHÀ TUYỂN DỤNG HÀNG ĐẦU (CHUYỂN HƯỚNG SANG employer_detail.php) -->
-    <section id="top-employers" class="py-5 bg-light border-bottom">
-        <div class="container">
-            <div class="text-center mb-4">
-                <h3 class="section-title-main">Nhà tuyển dụng hàng đầu</h3>
-            </div>
-
-            <!-- 4 Thẻ Công ty nằm ngang -->
-            <div class="row g-3">
-
-                <!-- Ô 1 -->
-                <div class="col-md-3 col-sm-6">
-                    <a href="employer_detail.php?id=1" class="text-decoration-none">
-                        <div class="top-employer-card">
-                            <div class="top-employer-logo"><i class="bi bi-building"></i></div>
-                            <div class="top-employer-name">Công Ty Jobio</div>
-                            <span class="top-employer-count">5 việc làm</span>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Ô 2 -->
-                <div class="col-md-3 col-sm-6">
-                    <a href="employer_detail.php?id=2" class="text-decoration-none">
-                        <div class="top-employer-card">
-                            <div class="top-employer-logo"><i class="bi bi-building-gear"></i></div>
-                            <div class="top-employer-name">Tập Đoàn ĐBSCL</div>
-                            <span class="top-employer-count">3 việc làm</span>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Ô 3 -->
-                <div class="col-md-3 col-sm-6">
-                    <a href="employer_detail.php?id=3" class="text-decoration-none">
-                        <div class="top-employer-card">
-                            <div class="top-employer-logo"><i class="bi bi-bank"></i></div>
-                            <div class="top-employer-name">Ngân Hàng Cần Thơ</div>
-                            <span class="top-employer-count">8 việc làm</span>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Ô 4 -->
-                <div class="col-md-3 col-sm-6">
-                    <a href="employer_detail.php?id=4" class="text-decoration-none">
-                        <div class="top-employer-card">
-                            <div class="top-employer-logo"><i class="bi bi-laptop"></i></div>
-                            <div class="top-employer-name">Tech Solution</div>
-                            <span class="top-employer-count">4 việc làm</span>
-                        </div>
-                    </a>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- 6. KHỐI NỘI DUNG 3: NGÀNH NGHỀ TRỌNG ĐIỂM -->
-    <section class="py-5 bg-white border-bottom">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h3 class="section-title-main">Ngành Nghề Trọng Điểm</h3>
-                <p class="section-subtitle-main">Hệ thống phân loại công việc rõ ràng giúp bạn dễ dàng lựa chọn</p>
-            </div>
-
-            <div class="row g-4 text-center">
-                <div class="col-md-4 feature-card">
-                    <div class="p-4 bg-white border rounded-3 shadow-sm h-100">
-                        <div class="feature-icon-box">
-                            <i class="bi bi-laptop fs-2"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-2">CÔNG NGHỆ THÔNG TIN</h6>
-                        <p class="text-muted fs-7 mb-0">Tuyển dụng Lập trình viên, Kiểm thử phần mềm, Quản trị hệ thống với nhiều cơ hội phát triển.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 feature-card">
-                    <div class="p-4 bg-white border rounded-3 shadow-sm h-100">
-                        <div class="feature-icon-box">
-                            <i class="bi bi-graph-up-arrow fs-2"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-2">KINH DOANH & MARKETING</h6>
-                        <p class="text-muted fs-7 mb-0">Nhiều vị trí Nhân viên kinh doanh, Chăm sóc khách hàng, Digital Marketing phù hợp mọi cấp độ.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 feature-card">
-                    <div class="p-4 bg-white border rounded-3 shadow-sm h-100">
-                        <div class="feature-icon-box">
-                            <i class="bi bi-calculator fs-2"></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-2">KẾ TOÁN & HÀNH CHÍNH</h6>
-                        <p class="text-muted fs-7 mb-0">Tìm kiếm công việc Kế toán tổng hợp, Hành chính nhân sự tại Cần Thơ và khu vực ĐBSCL.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 8. MỤC VIỆC LÀM NỔI BẬT (ĐÃ THÊM SỰ KIỆN CLICK TOÀN THẺ) -->
+    <!-- VIỆC LÀM DÀNH CHO ỨNG VIÊN -->
     <section class="py-5">
         <div class="container">
-            <h3 class="section-title-main text-center mb-4" style="font-size: 26px;">Việc làm nổi bật</h3>
-
-            <!-- Danh sách 4 việc làm mẫu -->
-            <div id="job-list" class="row g-3">
-
-                <!-- Ô 1 -->
-                <div class="col-md-6">
-                    <div class="job-featured-card" onclick="window.location.href='job_detail.php?id=1';" style="cursor: pointer;">
-                        <div class="job-logo-box"><i class="bi bi-laptop"></i></div>
-                        <div class="flex-grow-1 pe-3">
-                            <a href="job_detail.php?id=1" class="job-title" onclick="event.stopPropagation();">Lập Trình Viên PHP / MySQL</a>
-                            <div class="job-company">Công Ty TNHH Công Nghệ Jobio</div>
-                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>10 - 15 triệu</div>
-                            <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>Ninh Kiều, Cần Thơ</div>
-                        </div>
-                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm" onclick="event.stopPropagation();"></i>
-                    </div>
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <div>
+                    <h4 class="fw-bold text-dark m-0"><i class="bi bi-stars text-cupid me-2"></i>VIỆC LÀM DÀNH CHO BẠN</h4>
+                    <small class="text-muted">Danh sách các vị trí đang mở tuyển mới nhất hôm nay</small>
                 </div>
-
-                <!-- Ô 2 -->
-                <div class="col-md-6">
-                    <div class="job-featured-card" onclick="window.location.href='job_detail.php?id=2';" style="cursor: pointer;">
-                        <div class="job-logo-box"><i class="bi bi-graph-up-arrow"></i></div>
-                        <div class="flex-grow-1 pe-3">
-                            <a href="job_detail.php?id=2" class="job-title" onclick="event.stopPropagation();">Chuyên Viên Marketing Online</a>
-                            <div class="job-company">Tập Đoàn Truyền Thông ĐBSCL</div>
-                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>8 - 12 triệu</div>
-                            <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>Cái Răng, Cần Thơ</div>
-                        </div>
-                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm" onclick="event.stopPropagation();"></i>
-                    </div>
-                </div>
-
-                <!-- Ô 3 -->
-                <div class="col-md-6">
-                    <div class="job-featured-card" onclick="window.location.href='job_detail.php?id=3';" style="cursor: pointer;">
-                        <div class="job-logo-box"><i class="bi bi-calculator"></i></div>
-                        <div class="flex-grow-1 pe-3">
-                            <a href="job_detail.php?id=3" class="job-title" onclick="event.stopPropagation();">Kế Toán Tổng Hợp</a>
-                            <div class="job-company">Ngân Hàng Thương Mại Cần Thơ</div>
-                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>9 - 11 triệu</div>
-                            <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>Bình Thủy, Cần Thơ</div>
-                        </div>
-                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm" onclick="event.stopPropagation();"></i>
-                    </div>
-                </div>
-
-                <!-- Ô 4 -->
-                <div class="col-md-6">
-                    <div class="job-featured-card" onclick="window.location.href='job_detail.php?id=4';" style="cursor: pointer;">
-                        <div class="job-logo-box"><i class="bi bi-headset"></i></div>
-                        <div class="flex-grow-1 pe-3">
-                            <a href="job_detail.php?id=4" class="job-title" onclick="event.stopPropagation();">Nhân Viên Chăm Sóc Khách Hàng</a>
-                            <div class="job-company">Trung Tâm Dịch Vụ Khách Hàng Jobio</div>
-                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>7 - 9 triệu</div>
-                            <div class="job-location"><i class="bi bi-geo-alt text-primary me-1"></i>Ninh Kiều, Cần Thơ</div>
-                        </div>
-                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm" onclick="event.stopPropagation();"></i>
-                    </div>
-                </div>
-
+                <a href="job_list.php" class="btn btn-outline-rose btn-sm fw-semibold">
+                    Xem tất cả việc làm <i class="bi bi-arrow-right ms-1"></i>
+                </a>
             </div>
 
-            <!-- Chân khối: Link chuyển sang trang job_list.php -->
-            <div class="text-end mt-4">
-                <a href="job_list.php" class="text-decoration-none fw-semibold" style="color: #0d3b66; font-size: 15px;">
-                    Xem thêm việc làm mới cập nhật <i class="bi bi-arrow-right ms-1"></i>
-                </a>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="job-featured-card">
+                        <div class="job-logo-box"><i class="bi bi-laptop"></i></div>
+                        <div class="flex-grow-1 pe-4">
+                            <a href="job_detail.php?id=1" class="job-title">Lập Trình Viên PHP / MySQL</a>
+                            <div class="job-company">Công Ty TNHH Công Nghệ Jobio</div>
+                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>10 - 15 triệu</div>
+                            <div class="job-location"><i class="bi bi-geo-alt text-veranda me-1"></i>Ninh Kiều, Cần Thơ</div>
+                        </div>
+                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="job-featured-card">
+                        <div class="job-logo-box"><i class="bi bi-graph-up-arrow"></i></div>
+                        <div class="flex-grow-1 pe-4">
+                            <a href="job_detail.php?id=2" class="job-title">Chuyên Viên Marketing Online</a>
+                            <div class="job-company">Tập Đoàn Truyền Thông ĐBSCL</div>
+                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>8 - 12 triệu</div>
+                            <div class="job-location"><i class="bi bi-geo-alt text-veranda me-1"></i>Cái Răng, Cần Thơ</div>
+                        </div>
+                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="job-featured-card">
+                        <div class="job-logo-box"><i class="bi bi-calculator"></i></div>
+                        <div class="flex-grow-1 pe-4">
+                            <a href="job_detail.php?id=3" class="job-title">Kế Toán Tổng Hợp</a>
+                            <div class="job-company">Ngân Hàng Thương Mại Cần Thơ</div>
+                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>9 - 11 triệu</div>
+                            <div class="job-location"><i class="bi bi-geo-alt text-veranda me-1"></i>Bình Thủy, Cần Thơ</div>
+                        </div>
+                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="job-featured-card">
+                        <div class="job-logo-box"><i class="bi bi-headset"></i></div>
+                        <div class="flex-grow-1 pe-4">
+                            <a href="job_detail.php?id=4" class="job-title">Nhân Viên Chăm Sóc Khách Hàng</a>
+                            <div class="job-company">Trung Tâm Dịch Vụ Khách Hàng Jobio</div>
+                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>7 - 9 triệu</div>
+                            <div class="job-location"><i class="bi bi-geo-alt text-veranda me-1"></i>Ninh Kiều, Cần Thơ</div>
+                        </div>
+                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- 7. KHỐI NỘI DUNG 4: BẮT ĐẦU CÙNG JOBIO -->
-    <?php if (!$isLoggedIn): ?>
-    <section class="py-5 bg-light border-bottom">
+<?php else: ?>
+    <!-- ========================================================================= -->
+    <!-- TRẠNG THÁI 2: KHÁCH CHƯA ĐĂNG NHẬP (Giao diện nguyên vẹn đầy đủ ban đầu)  -->
+    <!-- ========================================================================= -->
+
+    <!-- 1. HERO BANNER TÌM KIẾM -->
+    <section class="hero-banner text-center py-5">
+        <div class="container py-3">
+            <h1 class="display-6 fw-bold text-white mb-2">TÌM KIẾM CƠ HỘI NGHỀ NGHIỆP CÙNG JOBIO</h1>
+            <p class="hero-slogan mb-4">Kết nối hàng ngàn ứng viên tài năng với các nhà tuyển dụng hàng đầu</p>
+
+            <form action="job_list.php" method="GET" onsubmit="if(!this.keyword.value.trim()) { event.preventDefault(); }">
+                <div class="row justify-content-center">
+                    <div class="col-lg-9">
+                        <div class="search-container d-flex align-items-center">
+                            <i class="bi bi-search fs-5 ms-2 me-2" style="color: var(--veranda-blue);"></i>
+                            <input type="text" name="keyword" class="form-control search-input" placeholder="Tên công việc, vị trí, kỹ năng tuyển dụng..." value="<?= htmlspecialchars($keyword) ?>">
+                            
+                            <div class="d-none d-md-block flex-shrink-0 me-2" style="width: 200px;">
+                                <select class="form-select search-select" name="location">
+                                    <option value="">📍 Tất cả địa điểm</option>
+                                    <option value="Cần Thơ">Cần Thơ</option>
+                                    <option value="TP.HCM">TP. Hồ Chí Minh</option>
+                                    <option value="Hà Nội">Hà Nội</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-rose px-4 py-2 fw-semibold flex-shrink-0">
+                                <i class="bi bi-search me-1"></i> Tìm kiếm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- 2. NHÀ TUYỂN DỤNG HÀNG ĐẦU (ĐẦY ĐỦ 3 CÔNG TY) -->
+    <section class="py-5 bg-white border-bottom">
         <div class="container">
-            <div class="text-center mb-5">
-                <h3 class="section-title-main">Bắt Đầu Cùng Jobio</h3>
-                <p class="section-subtitle-main">Đăng ký tài khoản ngay hôm nay để trải nghiệm dịch vụ</p>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold text-dark m-0">NHÀ TUYỂN DỤNG HÀNG ĐẦU</h4>
+                    <small class="text-muted">Các doanh nghiệp uy tín hàng đầu đang tuyển dụng</small>
+                </div>
+                <a href="employers.php" class="btn btn-outline-rose btn-sm fw-semibold">
+                    Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
+                </a>
             </div>
 
-            <div class="row g-4 justify-content-center text-center">
-                <div class="col-md-5">
-                    <div class="p-4 border rounded-3 bg-white h-100 d-flex flex-column justify-content-between">
-                        <div>
-                            <i class="bi bi-person-circle fs-1 text-primary mb-2"></i>
-                            <h5 class="fw-bold text-dark">Dành Cho Ứng Viên</h5>
-                            <p class="text-muted fs-7">Tạo tài khoản ứng viên, tìm kiếm việc làm mơ ước và ứng tuyển nhanh chóng.</p>
-                        </div>
-                        <div class="mt-3">
-                            <a href="register.php?role=candidate" class="btn btn-primary btn-sm px-4 fw-bold">Đăng ký Ứng viên</a>
-                        </div>
+            <div class="row g-4">
+                <div class="col-md-4 col-sm-6">
+                    <div class="top-employer-card">
+                        <div class="top-employer-logo"><i class="bi bi-building"></i></div>
+                        <h5 class="top-employer-name">Công Ty TNHH Công Nghệ Jobio</h5>
+                        <div class="small text-muted mb-2"><i class="bi bi-geo-alt text-cupid me-1"></i>Ninh Kiều, Cần Thơ</div>
+                        <span class="top-employer-count mb-3"><i class="bi bi-briefcase me-1"></i>5 vị trí tuyển dụng</span>
+                        <a href="employer_detail.php?id=1" class="btn btn-outline-rose btn-sm w-100 fw-semibold">Xem công ty</a>
                     </div>
                 </div>
 
-                <div class="col-md-5">
-                    <div class="p-4 border rounded-3 bg-white h-100 d-flex flex-column justify-content-between">
-                        <div>
-                            <i class="bi bi-building fs-1 text-warning mb-2"></i>
-                            <h5 class="fw-bold text-dark">Dành Cho Nhà Tuyển Dụng</h5>
-                            <p class="text-muted fs-7">Đăng ký tài khoản doanh nghiệp để đăng tin tuyển dụng và đón nhận các ứng viên tiềm năng.</p>
-                        </div>
-                        <div class="mt-3">
-                            <a href="register.php?role=employer" class="btn btn-orange btn-sm px-4 fw-bold">Đăng ký Nhà tuyển dụng</a>
-                        </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="top-employer-card">
+                        <div class="top-employer-logo"><i class="bi bi-building-gear"></i></div>
+                        <h5 class="top-employer-name">Tập Đoàn Truyền Thông ĐBSCL</h5>
+                        <div class="small text-muted mb-2"><i class="bi bi-geo-alt text-cupid me-1"></i>Cái Răng, Cần Thơ</div>
+                        <span class="top-employer-count mb-3"><i class="bi bi-briefcase me-1"></i>3 vị trí tuyển dụng</span>
+                        <a href="employer_detail.php?id=2" class="btn btn-outline-rose btn-sm w-100 fw-semibold">Xem công ty</a>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-6">
+                    <div class="top-employer-card">
+                        <div class="top-employer-logo"><i class="bi bi-bank"></i></div>
+                        <h5 class="top-employer-name">Ngân Hàng Thương Mại Cần Thơ</h5>
+                        <div class="small text-muted mb-2"><i class="bi bi-geo-alt text-cupid me-1"></i>Bình Thủy, Cần Thơ</div>
+                        <span class="top-employer-count mb-3"><i class="bi bi-briefcase me-1"></i>8 vị trí tuyển dụng</span>
+                        <a href="employer_detail.php?id=3" class="btn btn-outline-rose btn-sm w-100 fw-semibold">Xem công ty</a>
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- 3. VIỆC LÀM NỔI BẬT (ĐẦY ĐỦ 6 CARD VIỆC LÀM) -->
+    <section class="py-5">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold text-dark m-0">VIỆC LÀM NỔI BẬT</h4>
+                    <small class="text-muted">Các công việc hấp dẫn với mức lương cạnh tranh</small>
+                </div>
+                <a href="job_list.php" class="btn btn-outline-rose btn-sm fw-semibold">
+                    Xem tất cả việc làm <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="job-featured-card">
+                        <div class="job-logo-box"><i class="bi bi-laptop"></i></div>
+                        <div class="flex-grow-1 pe-4">
+                            <a href="job_detail.php?id=1" class="job-title">Lập Trình Viên PHP / MySQL</a>
+                            <div class="job-company">Công Ty TNHH Công Nghệ Jobio</div>
+                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>10 - 15 triệu</div>
+                            <div class="job-location"><i class="bi bi-geo-alt text-veranda me-1"></i>Ninh Kiều, Cần Thơ</div>
+                        </div>
+                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="job-featured-card">
+                        <div class="job-logo-box"><i class="bi bi-graph-up-arrow"></i></div>
+                        <div class="flex-grow-1 pe-4">
+                            <a href="job_detail.php?id=2" class="job-title">Chuyên Viên Marketing Online</a>
+                            <div class="job-company">Tập Đoàn Truyền Thông ĐBSCL</div>
+                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>8 - 12 triệu</div>
+                            <div class="job-location"><i class="bi bi-geo-alt text-veranda me-1"></i>Cái Răng, Cần Thơ</div>
+                        </div>
+                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="job-featured-card">
+                        <div class="job-logo-box"><i class="bi bi-calculator"></i></div>
+                        <div class="flex-grow-1 pe-4">
+                            <a href="job_detail.php?id=3" class="job-title">Kế Toán Tổng Hợp</a>
+                            <div class="job-company">Ngân Hàng Thương Mại Cần Thơ</div>
+                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>9 - 11 triệu</div>
+                            <div class="job-location"><i class="bi bi-geo-alt text-veranda me-1"></i>Bình Thủy, Cần Thơ</div>
+                        </div>
+                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="job-featured-card">
+                        <div class="job-logo-box"><i class="bi bi-headset"></i></div>
+                        <div class="flex-grow-1 pe-4">
+                            <a href="job_detail.php?id=4" class="job-title">Nhân Viên Chăm Sóc Khách Hàng</a>
+                            <div class="job-company">Trung Tâm Dịch Vụ Khách Hàng Jobio</div>
+                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>7 - 9 triệu</div>
+                            <div class="job-location"><i class="bi bi-geo-alt text-veranda me-1"></i>Ninh Kiều, Cần Thơ</div>
+                        </div>
+                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="job-featured-card">
+                        <div class="job-logo-box"><i class="bi bi-code-slash"></i></div>
+                        <div class="flex-grow-1 pe-4">
+                            <a href="job_detail.php?id=5" class="job-title">Lập Trình Viên Frontend (ReactJS / VueJS)</a>
+                            <div class="job-company">Công Ty Giải Pháp Phần Mềm Mekong</div>
+                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>12 - 18 triệu</div>
+                            <div class="job-location"><i class="bi bi-geo-alt text-veranda me-1"></i>Ninh Kiều, Cần Thơ</div>
+                        </div>
+                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="job-featured-card">
+                        <div class="job-logo-box"><i class="bi bi-person-gear"></i></div>
+                        <div class="flex-grow-1 pe-4">
+                            <a href="job_detail.php?id=6" class="job-title">Chuyên Viên Hành Chính Nhân Sự</a>
+                            <div class="job-company">Tập Đoàn Nông Nghiệp Xanh</div>
+                            <div class="job-salary"><i class="bi bi-cash-stack me-1"></i>8 - 10 triệu</div>
+                            <div class="job-location"><i class="bi bi-geo-alt text-veranda me-1"></i>Ô Môn, Cần Thơ</div>
+                        </div>
+                        <i class="bi bi-heart job-heart-btn" title="Lưu việc làm"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. CTA BANNER KÊU GỌI ĐĂNG KÝ -->
+                        <!-- KHỐI BANNER KÊU GỌI ĐĂNG KÝ MỚI CHUẨN THIẾT KẾ THẺ CAN GIỮA -->
+            <?php if (!$isLoggedIn): ?>
+            <section class="py-5 bg-light border-top">
+                <div class="container py-2">
+                    <div class="row g-4 justify-content-center">
+                        
+                        <!-- THẺ DÀNH CHO ỨNG VIÊN -->
+                        <div class="col-md-6 col-lg-5">
+                            <div class="card h-100 border shadow-sm rounded-4 p-4 text-center bg-white">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-between p-2">
+                                    <div>
+                                        <div class="bg-rose-soft text-rose rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                                            <i class="bi bi-person-fill fs-1"></i>
+                                        </div>
+                                        <h4 class="fw-bold text-dark mb-3">Dành Cho Ứng Viên</h4>
+                                        <p class="text-secondary small mb-4 px-2">
+                                            Tạo tài khoản ứng viên, tìm kiếm việc làm mơ ước và ứng tuyển nhanh chóng.
+                                        </p>
+                                    </div>
+                                    <a href="register.php?role=candidate" class="btn btn-rose fw-bold rounded-3 px-4 py-2.5 w-100">
+                                        Đăng ký Ứng viên
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- THẺ DÀNH CHO NHÀ TUYỂN DỤNG -->
+                        <div class="col-md-6 col-lg-5">
+                            <div class="card h-100 border shadow-sm rounded-4 p-4 text-center bg-white">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-between p-2">
+                                    <div>
+                                        <div class="bg-rose-soft text-rose rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                                            <i class="bi bi-building fs-1"></i>
+                                        </div>
+                                        <h4 class="fw-bold text-dark mb-3">Dành Cho Nhà Tuyển Dụng</h4>
+                                        <p class="text-secondary small mb-4 px-2">
+                                            Đăng tin tuyển dụng, tiếp cận hàng ngàn hồ sơ ứng viên sáng giá cho doanh nghiệp.
+                                        </p>
+                                    </div>
+                                    <a href="register.php?role=employer" class="btn btn-outline-rose fw-bold rounded-3 px-4 py-2.5 w-100">
+                                        Đăng ký Nhà tuyển dụng
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+            <?php endif; ?>
         </div>
     </section>
     <?php endif; ?>
@@ -541,3 +494,9 @@ $userName = $_SESSION['ho_ten'] ?? $_SESSION['user_name'] ?? 'Tài khoản';
 </body>
 
 </html>
+<?php endif; ?>
+
+<?php
+// 6. NHÚNG FOOTER DÙNG CHUNG
+require_once __DIR__ . '/../include/footer.php';
+?>
